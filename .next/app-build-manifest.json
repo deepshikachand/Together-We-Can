@@ -36,15 +36,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/events/route.js"
     ],
-    "/drives/[id]/register/page": [
+    "/create/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/drives/[id]/register/page.js"
+      "static/chunks/app/create/page.js"
     ],
-    "/_not-found/page": [
+    "/profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/profile/page.js"
+    ],
+    "/api/profile/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/profile/route.js"
+    ],
+    "/drive/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/drive/[id]/page.js"
+    ],
+    "/api/events/[id]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/events/[id]/route.js"
     ]
   }
 }

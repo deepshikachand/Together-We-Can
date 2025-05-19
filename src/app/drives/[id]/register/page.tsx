@@ -1,27 +1,31 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/navigation/navbar";
 
 interface DriveDetails {
   id: string;
   eventName: string;
+  description: string;
   date: string;
   time: string;
   location: string;
   city: {
-    name: string;
+    cityName: string;
     state: string;
   };
   category: {
     name: string;
   };
+  currentParticipants?: number;
 }
 
-export default function DriveRegistration({ params }: { params: { id: string } }) {
+export default function DriveRegistration() {
   const router = useRouter();
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const { data: session, status } = useSession();
   const [driveDetails, setDriveDetails] = useState<DriveDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,13 +41,13 @@ export default function DriveRegistration({ params }: { params: { id: string } }
   useEffect(() => {
     // Redirect if not authenticated
     if (status === "unauthenticated") {
-      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${params.id}/register`));
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${id}/register`));
     }
 
     // Fetch drive details
     const fetchDriveDetails = async () => {
       try {
-        const response = await fetch(`/api/events/${params.id}`);
+        const response = await fetch(`/api/events/${id}`);
         if (response.ok) {
           const data = await response.json();
           setDriveDetails(data);
@@ -68,7 +72,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
         }));
       }
     }
-  }, [params.id, session, status, router]);
+  }, [id, session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +82,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
     }
 
     try {
-      const response = await fetch(`/api/drives/${params.id}/register`, {
+      const response = await fetch(`/api/events/${id}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +91,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
       });
 
       if (response.ok) {
-        router.push(`/drives/${params.id}/confirmation`);
+        router.push(`/drives/${id}/confirmation`);
       } else {
         const data = await response.json();
         setError(data.message || "Registration failed");
@@ -129,6 +133,10 @@ export default function DriveRegistration({ params }: { params: { id: string } }
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {driveDetails?.eventName}
           </h1>
+          {/* Description */}
+          {driveDetails?.description && (
+            <p className="text-gray-700 mb-4">{driveDetails.description}</p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <p className="text-gray-600">
@@ -136,7 +144,13 @@ export default function DriveRegistration({ params }: { params: { id: string } }
                 {new Date(driveDetails?.date || "").toLocaleDateString()}
               </p>
               <p className="text-gray-600">
-                <span className="font-medium">Time:</span> {driveDetails?.time}
+                <span className="font-medium">Time:</span> {driveDetails?.time ?
+                  new Date(`1970-01-01T${driveDetails.time}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) :
+                  ""
+                }
+              </p>
+              <p className="text-gray-600">
+                <span className="font-medium">Participants:</span> {driveDetails?.currentParticipants ?? 0}
               </p>
             </div>
             <div className="space-y-2">
@@ -146,7 +160,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
               </p>
               <p className="text-gray-600">
                 <span className="font-medium">City:</span>{" "}
-                {driveDetails?.city.name}, {driveDetails?.city.state}
+                {driveDetails?.city?.cityName}, {driveDetails?.city?.state}
               </p>
             </div>
           </div>
@@ -171,7 +185,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C]"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C] text-black"
               />
             </div>
 
@@ -187,7 +201,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C]"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C] text-black"
               />
             </div>
 
@@ -203,7 +217,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C]"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C] text-black"
               />
             </div>
 
@@ -219,7 +233,7 @@ export default function DriveRegistration({ params }: { params: { id: string } }
                 required
                 value={formData.signature}
                 onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C]"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0E6E5C] focus:ring-[#0E6E5C] text-black"
                 placeholder="Type your full name as signature"
               />
             </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navigation/navbar";
 import { FaUserCircle } from "react-icons/fa";
+import Link from 'next/link';
 
 type User = {
   name: string;
@@ -99,8 +100,10 @@ export default function ProfilePage() {
             ) : (
               <ul className="list-disc pl-6">
                 {participatedDrives.map((drive) => (
-                  <li key={drive.id}>
-                    <b>{drive.eventName}</b> - {drive.date ? new Date(drive.date).toLocaleDateString() : ""} - {drive.location}
+                  <li key={drive.id} className="text-black">
+                    <Link href={`/drive/${drive.id}`} className="hover:underline">
+                      <b>{drive.eventName}</b> - {drive.date ? new Date(drive.date).toLocaleDateString() : ""} - {drive.location}
+                    </Link>
                   </li>
                 ))}
               </ul>
