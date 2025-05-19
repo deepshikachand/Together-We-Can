@@ -23,6 +23,10 @@ interface Event {
   currentParticipants: number;
   expectedParticipants: number;
   status: string;
+  categories: {
+    id: string;
+    categoryName: string;
+  }[];
 }
 
 interface City {
@@ -33,7 +37,7 @@ interface City {
 
 interface Category {
   id: string;
-  name: string;
+  categoryName: string;
   description: string;
 }
 
@@ -194,24 +198,24 @@ export default function DrivesPage() {
               <option value="" className="text-gray-700 bg-white">All Cities</option>
               {cities.map((city) => (
                 <option key={city.id} value={city.id} className="text-gray-900 bg-white">
-                  {`${city.name}, ${city.state}`}
+                  {city.state}
                 </option>
               ))}
             </select>
           </div>
           {/* Category Filter */}
           <div className="flex items-center bg-white rounded-xl shadow px-4 py-2 min-w-[220px]">
-            <span className="mr-2 text-xl">��</span>
+            <span className="mr-2 text-xl">🏷️</span>
             <select
               id="category"
               value={selectedCategory}
               onChange={handleCategoryChange}
-              className="w-full bg-transparent text-gray-900 font-semibold focus:outline-none"
+              className="w-full bg-transparent text-black font-semibold focus:outline-none"
             >
               <option value="" className="text-gray-700 bg-white">All Categories</option>
               {categories.map((category) => (
-                <option key={category.id} value={category.id} className="text-gray-900 bg-white">
-                  {category.name}
+                <option key={category.id} value={category.id} className="text-black bg-white">
+                  {category.categoryName}
                 </option>
               ))}
             </select>
@@ -294,9 +298,18 @@ export default function DrivesPage() {
 
                   {/* Category Tag */}
                   <div className="mb-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0E6E5C]/10 text-[#0E6E5C]">
-                      {event.category.name}
-                    </span>
+                    {event.categories && event.categories.length > 0 ? (
+                      event.categories.map((cat) => (
+                        <span
+                          key={cat.id}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0E6E5C]/10 text-[#0E6E5C] mr-2"
+                        >
+                          {cat.categoryName}
+                        </span>
+                      ))
+                    ) : (
+                      <span>No category</span>
+                    )}
                   </div>
 
                   {/* Join Button */}

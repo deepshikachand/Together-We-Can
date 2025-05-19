@@ -29,12 +29,43 @@ export async function GET(request: NextRequest) {
 
     // Fetch events from MongoDB using Prisma
     let where: any = {};
+
+    // Try to handle both ID and name/state for city and category
     if (cityId) {
-      where.cityId = cityId;
+      // If cityId looks like an ObjectId, use it directly
+      if (/^[a-f\d]{24}$/i.test(cityId)) {
+        where.cityId = cityId;
+      } else {
+        // Otherwise, try to look up the city by name/state
+        const [cityName, state] = cityId.split(",").map(s => s.trim());
+        const city = await prisma.city.findFirst({
+          where: {
+            cityName: cityName,
+            ...(state ? { state: state } : {})
+          }
+        });
+        if (city) {
+          where.cityId = city.id;
+        }
+      }
     }
     if (categoryId) {
-      where.categoryIds = { has: categoryId };
+      // If categoryId looks like an ObjectId, use it directly
+      if (/^[a-f\d]{24}$/i.test(categoryId)) {
+        where.categoryIds = { has: categoryId };
+      } else {
+        // Otherwise, try to look up the category by name
+        const category = await prisma.category.findFirst({
+          where: {
+            categoryName: categoryId
+          }
+        });
+        if (category) {
+          where.categoryIds = { has: category.id };
+        }
+      }
     }
+    console.log("cityId:", cityId, "categoryId:", categoryId, "where:", where);
 
     let events = await prisma.event.findMany({
       where,

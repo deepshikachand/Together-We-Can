@@ -3,111 +3,148 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create demo user
-  const demoUser = await prisma.user.upsert({
-    where: { email: 'demo@togetherwecan.com' },
-    update: {},
-    create: {
-      name: 'Demo User',
-      email: 'demo@togetherwecan.com',
-      password: 'password', // In production, use a hashed password!
-      age: 30,
-      gender: 'Other',
-      city: 'Mumbai',
-      phone: '9999999999',
-      role: 'admin',
+  // Create multiple cities
+  const cities = await Promise.all([
+    prisma.city.create({
+      data: {
+        cityName: "Delhi",
+        state: "Delhi",
+        country: "India",
+      },
+    }),
+    prisma.city.create({
+      data: {
+        cityName: "Mumbai",
+        state: "Maharashtra",
+        country: "India",
+      },
+    }),
+    prisma.city.create({
+      data: {
+        cityName: "Bangalore",
+        state: "Karnataka",
+        country: "India",
+      },
+    }),
+    prisma.city.create({
+      data: {
+        cityName: "Chennai",
+        state: "Tamil Nadu",
+        country: "India",
+      },
+    }),
+    prisma.city.create({
+      data: {
+        cityName: "Kolkata",
+        state: "West Bengal",
+        country: "India",
+      },
+    }),
+  ]);
+
+  // Create multiple categories
+  const categories = await Promise.all([
+    prisma.category.create({
+      data: {
+        categoryName: "Education",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        categoryName: "Healthcare",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        categoryName: "Environment",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        categoryName: "Animal Welfare",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        categoryName: "Community Service",
+      },
+    }),
+  ]);
+
+  console.log("Created cities and categories");
+
+  // Create a demo user
+  const demoUser = await prisma.user.create({
+    data: {
+      name: "Demo User",
+      email: "demo@example.com",
+      password: "hashedpassword", // In production, use proper password hashing
+      age: 25,
+      gender: "Other",
+      city: "Mumbai",
+      phone: "9876543210",
+      role: "user"
     },
   });
 
-  // Create categories
-  const categories = [
-    { id: '1', name: 'Education', description: 'Events related to teaching, learning, and knowledge sharing.' },
-    { id: '2', name: 'Environment', description: 'Activities focused on sustainability and environmental conservation.' },
-    { id: '3', name: 'Health', description: 'Health and wellness initiatives, including fitness drives and medical camps.' },
-    { id: '4', name: 'Community Service', description: 'Social drives to help the underprivileged or support local communities.' },
-    { id: '5', name: 'Arts and Culture', description: 'Promoting art, music, theater, and cultural heritage.' },
-    { id: '6', name: 'Sports', description: 'Events related to physical activities, competitions, and sportsmanship.' },
+  // Sample event titles for variety
+  const eventTitles = [
+    "Clean City Initiative",
+    "Education for All",
+    "Health Camp",
+    "Tree Plantation Drive",
+    "Food Distribution",
+    "Blood Donation Camp",
+    "Animal Shelter Support",
+    "Senior Citizen Care",
+    "Youth Mentorship Program",
+    "Women Empowerment Workshop"
   ];
-  for (const cat of categories) {
-    await prisma.category.upsert({
-      where: { id: cat.id },
-      update: {},
-      create: { id: cat.id, categoryName: cat.name },
-    });
-  }
 
-  // Create cities
-  const cities = [
-    { id: '1', cityName: 'Mumbai', state: 'Maharashtra', country: 'India' },
-    { id: '2', cityName: 'Delhi', state: 'Delhi', country: 'India' },
-    { id: '3', cityName: 'Bangalore', state: 'Karnataka', country: 'India' },
-    { id: '4', cityName: 'Hyderabad', state: 'Telangana', country: 'India' },
-    { id: '5', cityName: 'Chennai', state: 'Tamil Nadu', country: 'India' },
-    { id: '6', cityName: 'Kolkata', state: 'West Bengal', country: 'India' },
-    { id: '7', cityName: 'Pune', state: 'Maharashtra', country: 'India' },
-    { id: '8', cityName: 'Ahmedabad', state: 'Gujarat', country: 'India' },
-    { id: '9', cityName: 'Jaipur', state: 'Rajasthan', country: 'India' },
-    { id: '10', cityName: 'Lucknow', state: 'Uttar Pradesh', country: 'India' },
-  ];
-  for (const city of cities) {
-    await prisma.city.upsert({
-      where: { id: city.id },
-      update: {},
-      create: city,
-    });
-  }
-
-  // Generate 50 sample events
-  const sampleTitles = [
-    'Beach Cleanup Drive', 'Tree Plantation', 'Blood Donation Camp', 'Book Donation', 'Health Awareness Walk',
-    'Art for Change', 'Sports for All', 'Community Kitchen', 'Senior Citizen Support', 'Plastic Free Rally',
-    'Yoga in the Park', 'STEM Workshop', 'Music for a Cause', 'Food Distribution', 'River Cleaning',
-    'Coding Bootcamp', 'Women Empowerment Talk', 'Mental Health Seminar', 'First Aid Training', 'Animal Shelter Visit',
-    'Gardening Day', 'Science Fair', 'Marathon for Health', 'Cultural Fest', 'Career Guidance',
-    'Disaster Relief Prep', 'Blood Pressure Check', 'Nutrition Workshop', 'Dance for Joy', 'Clean Streets Campaign',
-    'Charity Run', 'Recycling Drive', 'Art Therapy', 'Sports Day', 'Book Reading',
-    'Medical Camp', 'Child Safety Workshop', 'Green Energy Talk', 'Music Night', 'Fitness Bootcamp',
-    'Elderly Care', 'Beach Yoga', 'Coding for Kids', 'Art Competition', 'Community Debate',
-    'Public Speaking', 'Chess Tournament', 'Drama Workshop', 'Photography Walk', 'Language Exchange'
-  ];
-  const events = [];
+  // Create 50 sample events
   for (let i = 0; i < 50; i++) {
-    const city = cities[Math.floor(Math.random() * cities.length)];
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const daysFromNow = Math.floor(Math.random() * 60) + 1;
-    const date = new Date();
-    date.setDate(date.getDate() + daysFromNow);
-    const expected = Math.floor(Math.random() * 100) + 20;
-    const current = Math.floor(Math.random() * expected);
-    events.push({
-      id: (i + 1).toString(),
-      eventName: sampleTitles[i % sampleTitles.length] + ' #' + (i + 1),
-      description: `This is a sample event: ${sampleTitles[i % sampleTitles.length]}. Join us to make a difference!`,
-      date,
-      time: `${8 + (i % 10)}:00`,
-      location: `${city.cityName} Community Center`,
-      cityId: city.id,
-      categoryIds: [category.id],
-      expectedParticipants: expected,
-      currentParticipants: current,
-      status: 'UPCOMING',
-      creatorId: demoUser.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const randomCity = cities[Math.floor(Math.random() * cities.length)];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    const randomTitle = eventTitles[Math.floor(Math.random() * eventTitles.length)];
+    
+    // Generate a random date within the next 3 months
+    const randomDate = new Date();
+    randomDate.setDate(randomDate.getDate() + Math.floor(Math.random() * 90));
+    
+    // Generate random time
+    const hours = Math.floor(Math.random() * 24).toString().padStart(2, '0');
+    const minutes = Math.floor(Math.random() * 60).toString().padStart(2, '0');
+    const randomTime = `${hours}:${minutes}`;
+
+    // Generate random participant counts
+    const expectedParticipants = Math.floor(Math.random() * 50) + 10;
+    const currentParticipants = Math.floor(Math.random() * expectedParticipants);
+
+    await prisma.event.create({
+      data: {
+        eventName: `${randomTitle} ${i + 1}`,
+        description: `Join us for this meaningful ${randomCategory.categoryName.toLowerCase()} initiative in ${randomCity.cityName}. Together we can make a difference!`,
+        date: randomDate,
+        time: randomTime,
+        location: `${randomCity.cityName} Central Area`,
+        cityId: randomCity.id,
+        categoryIds: [randomCategory.id],
+        expectedParticipants,
+        currentParticipants,
+        status: "upcoming",
+        creatorId: demoUser.id,
+      },
     });
+
+    console.log(`Created event ${i + 1}: ${randomTitle} ${i + 1}`);
   }
-  for (const event of events) {
-    await prisma.event.upsert({
-      where: { id: event.id },
-      update: {},
-      create: event,
-    });
-  }
+
+  console.log("Successfully created 50 sample events!");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Error during seeding:", e);
     process.exit(1);
   })
   .finally(async () => {
