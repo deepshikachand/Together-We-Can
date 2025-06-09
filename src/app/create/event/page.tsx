@@ -7,13 +7,13 @@ import { useSession } from "next-auth/react";
 
 interface Category {
   id: string;
-  name: string;
+  categoryName: string;
   description: string;
 }
 
 interface City {
   id: string;
-  name: string;
+  cityName: string;
   state: string;
 }
 
@@ -126,7 +126,7 @@ export default function CreateEventForm() {
       }
 
       // Redirect to the event page
-      router.push(`/events/${event.id}`);
+      router.push(`/drives/${event.id}`);
     } catch (error) {
       console.error("Error creating event:", error);
       setError(error instanceof Error ? error.message : "Failed to create event. Please try again.");
@@ -256,7 +256,7 @@ export default function CreateEventForm() {
                   <option value="">Select a city</option>
                   {cities.map((city) => (
                     <option key={city.id} value={city.id}>
-                      {`${city.name}, ${city.state}`}
+                      {`${city.cityName}, ${city.state}`}
                     </option>
                   ))}
                 </select>
@@ -278,7 +278,7 @@ export default function CreateEventForm() {
                   <option value="">Select a category</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {category.categoryName}
                     </option>
                   ))}
                 </select>

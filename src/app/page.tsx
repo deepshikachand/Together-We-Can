@@ -18,11 +18,13 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
-            <div className="space-y-6 max-w-xl">
+            <div className="space-y-6 max-w-lg">
               <p className="text-white/80 text-lg">Connect, Volunteer, Make a Difference</p>
               <h1 className="text-6xl font-bold text-white">Together We Can</h1>
               <p className="text-white/80 text-lg">
-                Lorem ipsum dolor sit amet consectetur. Ultrices ultrices pulvinar maecenas neque. Sit tellus nunc enim cursus dolor ultrices sit ullamcorper aliquet.
+                <b>Join hands to build a better tomorrow.</b><br/>
+                Whether it's planting trees, helping communities, or spreading awareness, be the reason someone believes in kindness again.<br/>
+                <b>Together, we rise. Together, we can.</b>
               </p>
             </div>
 

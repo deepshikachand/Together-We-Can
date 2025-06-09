@@ -75,28 +75,10 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
 
   const handleJoinClick = async () => {
     if (!session) {
-      router.push("/auth/login");
+      router.push(`/auth/signin?callbackUrl=/drives/${id}/register`);
       return;
     }
-    setJoinLoading(true);
-    setJoinError("");
-    setJoinSuccess(false);
-    try {
-      const response = await fetch(`/api/events/${id}/join`, {
-        method: "POST",
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to join event");
-      }
-      setJoinSuccess(true);
-      // Optionally, refresh event data to update participant count
-      setEvent((prev) => prev ? { ...prev, currentParticipants: prev.currentParticipants + 1 } : prev);
-    } catch (error) {
-      setJoinError(error instanceof Error ? error.message : "Failed to join event. Please try again.");
-    } finally {
-      setJoinLoading(false);
-    }
+    router.push(`/drives/${id}/register`);
   };
 
   if (loading) {

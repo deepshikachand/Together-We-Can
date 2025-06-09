@@ -1,9 +1,14 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/profile/route": "app/api/profile/route.js",
-  "/api/events/[id]/route": "app/api/events/[id]/route.js",
+  "/api/cities/route": "app/api/cities/route.js",
+  "/api/events/route": "app/api/events/route.js",
+  "/api/categories/route": "app/api/categories/route.js",
+  "/api/blogs/route": "app/api/blogs/route.js",
+  "/api/blogs/popular/route": "app/api/blogs/popular/route.js",
   "/auth/signin/page": "app/auth/signin/page.js",
   "/page": "app/page.js",
-  "/drives/[id]/page": "app/drives/[id]/page.js",
-  "/profile/page": "app/profile/page.js"
+  "/drives/page": "app/drives/page.js",
+  "/create/page": "app/create/page.js",
+  "/blog/page": "app/blog/page.js",
+  "/contact/page": "app/contact/page.js"
 }

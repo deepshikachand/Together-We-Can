@@ -42,7 +42,7 @@ interface Category {
 
 interface City {
   id: string;
-  name: string;
+  cityName: string;
   state: string;
 }
 
@@ -182,7 +182,7 @@ export default function BlogPage() {
                 <option value="">All Cities</option>
                 {cities.map((city) => (
                   <option key={city.id} value={city.id}>
-                    {`${city.name}, ${city.state}`}
+                    {`${city.cityName}, ${city.state}`}
                   </option>
                 ))}
               </select>

@@ -31,7 +31,7 @@ interface Event {
 
 interface City {
   id: string;
-  name: string;
+  cityName: string;
   state: string;
 }
 
@@ -73,7 +73,7 @@ export default function DrivesPage() {
           setCategories(categoriesData);
           
           // Set Mumbai as default city
-          const mumbai = citiesData.find((city: City) => city.name === "Mumbai");
+          const mumbai = citiesData.find((city: City) => city.cityName === "Mumbai");
           if (mumbai) {
             setCurrentCity(mumbai);
             setSelectedCity(mumbai.id);
@@ -198,7 +198,7 @@ export default function DrivesPage() {
               <option value="" className="text-gray-700 bg-white">All Cities</option>
               {cities.map((city) => (
                 <option key={city.id} value={city.id} className="text-gray-900 bg-white">
-                  {city.state}
+                  {`${city.cityName}, ${city.state}`}
                 </option>
               ))}
             </select>
