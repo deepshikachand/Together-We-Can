@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  password      String
+  age           Int
+  gender        String
+  city          String
+  phone         String    @unique
+  role          String    @default("user") // "admin" or "user"
+  image         String?
+  createdEvents Event[]   @relation("CreatedEvents")
+  joinedEvents  Participant[]
+  blogs         Blog[]
+  testimonials  Testimonial[]
+  notifications Notification[]
+  mediaUploads  Media[]
+  driveCompletions DriveCompletion[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Event {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  eventName           String
+  description         String
+  startDate           DateTime  @map("date") // Renamed from 'date' to 'startDate'
+  endDate             DateTime? // Optional for multi-day drives
+  time                String
+  location            String    // Keep for fallback
+  fullAddress         String?   // New: Detailed address
+  latitude            Float?    // New: For map display
+  longitude           Float?    // New: For map display
+  expectedParticipants Int
+  currentParticipants  Int      @default(0)
+  categories          Category[] @relation(fields: [categoryIds], references: [id])
+  categoryIds         String[]  @db.ObjectId
+  creator             User      @relation("CreatedEvents", fields: [creatorId], references: [id])
+  creatorId           String    @db.ObjectId
+  city                City      @relation(fields: [cityId], references: [id])
+  cityId              String    @db.ObjectId
+  status              String    @default("upcoming") // "upcoming", "active", "completed", "cancelled", "postponed"
+  statusReason        String?
+  statusUpdatedBy     String?   @db.ObjectId
+  statusUpdatedAt     DateTime?
+  postponedUntil      DateTime? // New: Only for postponed events
+  participants        Participant[]
+  testimonials        Testimonial[]
+  blogs               Blog[]
+  media               Media[]
+  driveCompletion     DriveCompletion?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Participant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  joinedAt  DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model City {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cityName  String
+  state     String
+  country   String
+  events    Event[]
+  createdAt DateTime @default(now())
+
+  @@unique([cityName, state, country])
+}
+
+model Blog {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  content       String
+  summary       String?      // AI summary or blog intro
+  keywords      String[]     // auto-extracted or user-specified
+  highlights    String[]     // pulled from DriveCompletion
+  testimonials  Json?        // raw testimonials used (optional)
+  ratingAverage Float?       // avg rating from feedback
+  wordCount     Int?         // optional: for display metrics
+  aiGenerated   Boolean      @default(true) // is it AI-generated?
+  reviewed      Boolean      @default(false) // has admin reviewed it?
+
+  author        User     @relation(fields: [authorId], references: [id])
+  authorId      String   @db.ObjectId
+
+  event         Event?   @relation(fields: [eventId], references: [id])
+  eventId       String?  @db.ObjectId
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Category {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryName String   @unique
+  events       Event[]  @relation(fields: [eventIds], references: [id])
+  eventIds     String[] @db.ObjectId
+  createdAt    DateTime @default(now())
+}
+
+model Testimonial {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  event       Event    @relation(fields: [eventId], references: [id])
+  eventId     String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.ObjectId
+  testimonial String
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  mediaType       String // "image" or "document"
+  mediaUrl        String
+  uploader        User     @relation(fields: [uploadedBy], references: [id])
+  uploadedBy      String   @db.ObjectId
+  event           Event?   @relation(fields: [associatedEvent], references: [id])
+  associatedEvent String?  @db.ObjectId
+  uploadedAt      DateTime @default(now())
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model DriveCompletion {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  event         Event    @relation(fields: [eventId], references: [id])
+  eventId       String   @unique @db.ObjectId
+
+  summary       String
+  images        String[] // Array of image URLs
+  highlights    String[] // Key achievements
+  testimonials  TestimonialEntry[] // Quotes from participants, now an array of objects
+  keywords      String[] // For AI/blog generation
+
+  submittedBy   User     @relation(fields: [userId], references: [id])
+  userId        String   @db.ObjectId
+  submittedAt   DateTime @default(now())
+  status        String   @default("pending") // "pending", "approved", "rejected"
+}
+
+type TestimonialEntry {
+  userId              String    @db.ObjectId
+  testimonial         String
+  rating              Int
+  locationClear       Boolean?
+  orgRating           Int?
+  volunteerImpactFelt Int?
+  wouldAttendAgain    Boolean?
+  suggestions         String?
+  submittedAt         DateTime  @default(now())
+}

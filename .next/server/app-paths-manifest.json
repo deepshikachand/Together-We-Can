@@ -1,0 +1,10 @@
+{
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/profile/route": "app/api/profile/route.js",
+  "/api/drive-completion/feedback/route": "app/api/drive-completion/feedback/route.js",
+  "/page": "app/page.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/drives/[id]/page": "app/drives/[id]/page.js",
+  "/blogs/review/[eventId]/page": "app/blogs/review/[eventId]/page.js"
+}
