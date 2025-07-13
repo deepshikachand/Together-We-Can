@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar } from "@/components/navigation/navbar";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 // Client-side components
 const CommentForm = ({ onSubmit }: { onSubmit: (text: string) => void }) => {
@@ -53,14 +53,10 @@ interface Blog {
   id: string;
   title: string;
   content: string;
+  summary?: string;
   category: {
     id: string;
     name: string;
-  };
-  city: {
-    id: string;
-    name: string;
-    state: string;
   };
   author: {
     id: string;
@@ -75,7 +71,6 @@ interface Blog {
     location: string;
   };
   media: {
-    id: string;
     mediaUrl: string;
   }[];
   createdAt: string;
@@ -93,74 +88,79 @@ interface Comment {
   createdAt: string;
 }
 
+const SkeletonLoader = () => (
+  <div className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8 animate-pulse">
+    <div className="h-8 bg-gray-300 rounded w-1/4 mb-4"></div>
+    <div className="h-12 bg-gray-300 rounded w-3/4 mb-6"></div>
+    <div className="h-6 bg-gray-300 rounded w-1/2 mb-8"></div>
+    <div className="h-96 bg-gray-300 rounded-lg mb-8"></div>
+    <div className="space-y-4">
+      <div className="h-4 bg-gray-300 rounded"></div>
+      <div className="h-4 bg-gray-300 rounded"></div>
+      <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+    </div>
+  </div>
+);
+
 // Main component
-export default function BlogPage({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default function BlogPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const router = useRouter();
 
-  // In a real app, you would fetch the blog from your API
-  // For demo purposes, we'll use sample data
-  const blog: Blog = {
-    id: "1",
-    title: "Tree Plantation Drive in Delhi",
-    content: `In the heart of Delhi, volunteers gathered to plant over 500 trees in local parks, contributing to environmental sustainability. The event saw participation from all age groups, making it a truly community-driven initiative.
+  const [blog, setBlog] = useState<Blog | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-The day started early with a brief training session on proper tree planting techniques. Participants learned about the importance of soil preparation, root care, and ongoing maintenance. Local environmental experts were present to guide the volunteers and share knowledge about native tree species.
+  useEffect(() => {
+    if (id) {
+      const fetchBlog = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(`/api/blogs/${id}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch blog data.");
+          }
+          const data = await response.json();
+          setBlog(data);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-Throughout the day, teams worked together to plant various types of trees, including neem, peepal, and jamun. These species were carefully selected for their ability to thrive in Delhi's climate and their contribution to local biodiversity.
+      fetchBlog();
+    }
+  }, [id]);
 
-The initiative not only helped in increasing the city's green cover but also created awareness about environmental conservation. Many participants pledged to continue their involvement in similar environmental projects.
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <SkeletonLoader />
+      </main>
+    );
+  }
 
-The success of this drive has inspired plans for regular tree plantation events across different areas of Delhi. Local authorities have shown interest in supporting these initiatives, recognizing their importance in combating air pollution and improving the city's ecological balance.`,
-    category: { id: "2", name: "Environment" },
-    city: { id: "2", name: "Delhi", state: "Delhi" },
-    author: { id: "1", name: "John Doe" },
-    event: {
-      id: "1",
-      eventName: "Delhi Green Initiative",
-      participants: 200,
-      date: "2024-03-20",
-      time: "09:00",
-      location: "Central Park, Delhi",
-    },
-    media: [
-      {
-        id: "1",
-        mediaUrl: "/images/tree-plantation.jpeg",
-      },
-    ],
-    createdAt: "2024-03-15T10:00:00Z",
-    viewCount: 150,
-  };
+  if (error) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="text-center py-16 text-red-600">{error}</div>
+      </main>
+    );
+  }
 
-  // Sample comments
-  const comments: Comment[] = [
-    {
-      id: "1",
-      author: {
-        id: "2",
-        name: "Jane Smith",
-        image: "/images/avatar1.jpg",
-      },
-      content: "Great initiative! Looking forward to participating in the next drive.",
-      createdAt: "2024-03-16T08:30:00Z",
-    },
-    {
-      id: "2",
-      author: {
-        id: "3",
-        name: "Mike Johnson",
-        image: "/images/avatar2.jpeg",
-      },
-      content: "The training session was very informative. Learned a lot about tree planting!",
-      createdAt: "2024-03-16T09:15:00Z",
-    },
-  ];
-
-  const handleCommentSubmit = (text: string) => {
-    // In a real app, you would send this to your API
-    console.log("New comment:", text);
-  };
-
+  if (!blog) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="text-center py-16 text-gray-500">Blog not found.</div>
+      </main>
+    );
+  }
+  
   return (
     <main className="min-h-screen bg-gray-50">
       <Navbar />
@@ -169,110 +169,58 @@ The success of this drive has inspired plans for regular tree plantation events 
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-blue-600">{blog.category.name}</span>
+            <span className="text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">{blog.category.name}</span>
             <span className="text-sm text-gray-500">
-              {new Date(blog.createdAt).toLocaleDateString()}
+              {new Date(blog.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{blog.title}</h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">{blog.title}</h1>
           <div className="flex items-center text-gray-600">
             <span>By {blog.author.name}</span>
-            <span className="mx-2">•</span>
-            <span>{blog.viewCount} views</span>
           </div>
         </header>
 
         {/* Featured Image */}
-        {blog.media[0] && (
-          <div className="relative h-96 mb-8 rounded-lg overflow-hidden">
-            <Image
-              src={blog.media[0].mediaUrl}
-              alt={blog.title}
-              layout="fill"
-              objectFit="cover"
-            />
-          </div>
-        )}
+        <div className="relative h-96 mb-12 rounded-lg overflow-hidden shadow-lg">
+          <Image
+            src={blog.media[0]?.mediaUrl || '/images/hero-1.jpg'}
+            alt={blog.title}
+            layout="fill"
+            objectFit="cover"
+            priority
+          />
+        </div>
 
         {/* Content */}
-        <div className="prose max-w-none mb-12">
-          {blog.content.split("\n\n").map((paragraph, index) => (
-            <p key={index} className="mb-4 text-gray-700">
-              {paragraph}
-            </p>
-          ))}
+        <div className="prose prose-lg max-w-none mb-12 text-gray-700">
+            <p className="lead font-semibold text-gray-800">{blog.summary}</p>
+            {blog.content.split("\n\n").map((paragraph, index) => (
+              <p key={index}>
+                {paragraph}
+              </p>
+            ))}
         </div>
 
         {/* Event Details */}
         {blog.event && (
-          <div className="bg-blue-50 rounded-lg p-6 mb-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Related Event Details
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Related Drive Details
             </h2>
-            <div className="space-y-2">
-              <p className="text-gray-700">
-                <strong>Event:</strong> {blog.event.eventName}
-              </p>
-              <p className="text-gray-700">
-                <strong>Date:</strong>{" "}
-                {new Date(blog.event.date).toLocaleDateString()} at{" "}
-                {blog.event.time}
-              </p>
-              <p className="text-gray-700">
-                <strong>Location:</strong> {blog.event.location}
-              </p>
-              <p className="text-gray-700">
-                <strong>Participants:</strong> {blog.event.participants}
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+              <p><strong>Drive:</strong> {blog.event.eventName}</p>
+              <p><strong>Date:</strong> {new Date(blog.event.date).toLocaleDateString()}</p>
+              <p><strong>Location:</strong> {blog.event.location}</p>
+              <p><strong>Participants:</strong> {blog.event.participants}</p>
             </div>
-            <EventButton eventId={blog.event.id} />
+             <button
+                onClick={() => router.push(`/drives/${blog.event?.id}`)}
+                className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                View Drive
+              </button>
           </div>
         )}
-
-        {/* Comments Section */}
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-            Comments ({comments.length})
-          </h2>
-
-          {/* Comment Form */}
-          <CommentForm onSubmit={handleCommentSubmit} />
-
-          {/* Comments List */}
-          <div className="space-y-6">
-            {comments.map((comment) => (
-              <div key={comment.id} className="flex space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="relative h-10 w-10 rounded-full overflow-hidden">
-                    {comment.author.image ? (
-                      <Image
-                        src={comment.author.image}
-                        alt={comment.author.name}
-                        layout="fill"
-                        objectFit="cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        {comment.author.name[0]}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center mb-1">
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {comment.author.name}
-                    </h3>
-                    <span className="ml-2 text-sm text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-700">{comment.content}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </article>
     </main>
   );

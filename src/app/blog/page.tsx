@@ -9,6 +9,7 @@ interface Blog {
   id: string;
   title: string;
   content: string;
+  summary?: string;
   category: {
     id: string;
     name: string;
@@ -28,16 +29,10 @@ interface Blog {
     participants: number;
   };
   media: {
-    id: string;
     mediaUrl: string;
   }[];
   createdAt: string;
   viewCount?: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
 }
 
 interface City {
@@ -46,14 +41,28 @@ interface City {
   state: string;
 }
 
+const SkeletonCard = () => (
+  <div className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+    <div className="h-48 bg-gray-300"></div>
+    <div className="p-6">
+      <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+      <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+      <div className="h-4 bg-gray-300 rounded w-5/6 mb-4"></div>
+      <div className="flex items-center justify-between">
+        <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+        <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function BlogPage() {
   const router = useRouter();
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("date");
+  const [sortBy, setSortBy] = useState<string>("most-viewed");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,23 +72,15 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [categoriesRes, citiesRes] = await Promise.all([
-          fetch("/api/categories"),
-          fetch("/api/cities"),
-        ]);
+        const citiesRes = await fetch("/api/cities");
 
-        if (categoriesRes.ok && citiesRes.ok) {
-          const [categoriesData, citiesData] = await Promise.all([
-            categoriesRes.json(),
-            citiesRes.json(),
-          ]);
-
-          setCategories(categoriesData);
+        if (citiesRes.ok) {
+          const citiesData = await citiesRes.json();
           setCities(citiesData);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load filters");
+        console.error("Error fetching cities:", error);
+        setError("Failed to load city filter");
       }
     };
 
@@ -92,7 +93,6 @@ export default function BlogPage() {
       setIsLoading(true);
       try {
         const queryParams = new URLSearchParams({
-          ...(selectedCategory && { categoryId: selectedCategory }),
           ...(selectedCity && { cityId: selectedCity }),
           ...(searchQuery && { search: searchQuery }),
           sortBy,
@@ -102,6 +102,8 @@ export default function BlogPage() {
         if (response.ok) {
           const data = await response.json();
           setBlogs(data);
+        } else {
+          throw new Error('Failed to fetch blogs');
         }
       } catch (error) {
         console.error("Error fetching blogs:", error);
@@ -111,8 +113,15 @@ export default function BlogPage() {
       }
     };
 
-    fetchBlogs();
-  }, [selectedCategory, selectedCity, sortBy, searchQuery]);
+    // Debounce search query
+    const handler = setTimeout(() => {
+      fetchBlogs();
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [selectedCity, sortBy, searchQuery]);
 
   // Fetch popular blogs
   useEffect(() => {
@@ -133,8 +142,7 @@ export default function BlogPage() {
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    setSearchQuery(formData.get("search") as string);
+    // The debounced useEffect handles the fetching
   };
 
   return (
@@ -142,81 +150,86 @@ export default function BlogPage() {
       <Navbar />
 
       {/* Header Section */}
-      <section className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-900 text-center">
+      <section className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl font-bold text-[#003B2F] sm:text-5xl tracking-tight">
             Our Impactful Drives
           </h1>
-          <p className="mt-4 text-xl text-gray-500 text-center">
-            Read about the social drives making a difference!
+          <div className="mt-4 h-1 w-24 bg-[#FF6B00] mx-auto"></div>
+          <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
+            Read about the social drives making a difference in our communities!
           </p>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Filters */}
-            <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Category Filter */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {/* Search by Name Filter */}
+                <input
+                  type="text"
+                  placeholder="Search by name of event..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full px-4 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
+                />
 
-              {/* City Filter */}
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="">All Cities</option>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {`${city.cityName}, ${city.state}`}
-                  </option>
-                ))}
-              </select>
+                {/* City Filter */}
+                <select
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
+                >
+                  <option value="">All Cities</option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {`${city.cityName}, ${city.state}`}
+                    </option>
+                  ))}
+                </select>
 
-              {/* Sort By */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="date">Most Recent</option>
-                <option value="views">Most Viewed</option>
-                <option value="participants">Most Participants</option>
-              </select>
+                {/* Sort By */}
+                <div title="Sort by popularity">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="block w-full pl-3 pr-10 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
+                  >
+                    <option value="most-viewed">Most Viewed</option>
+                    <option value="least-viewed">Least Viewed</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             {/* Blog Grid */}
             {isLoading ? (
-              <div className="text-center py-12">Loading blogs...</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
             ) : error ? (
-              <div className="text-center py-12 text-red-600">{error}</div>
+              <div className="text-center py-12 text-red-600 bg-white rounded-lg shadow-md">{error}</div>
             ) : blogs.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow-md">
                 No blogs found. Try adjusting your filters.
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {blogs.map((blog) => (
                   <div
                     key={blog.id}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden"
+                    className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col group transform hover:-translate-y-2 transition-transform duration-300 ease-in-out"
+                    onClick={() => router.push(`/blog/${blog.id}`)}
                   >
-                    {blog.media[0] && (
-                      <div className="relative h-48">
+                    {blog.media[0]?.mediaUrl && (
+                      <div className="relative h-52">
                         <Image
                           src={blog.media[0].mediaUrl}
                           alt={blog.title}
@@ -225,31 +238,25 @@ export default function BlogPage() {
                         />
                       </div>
                     )}
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-blue-600">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="inline-block bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full">
                           {blog.category.name}
                         </span>
                         <span className="text-sm text-gray-500">
                           {new Date(blog.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#FF6B00] transition-colors duration-300">
                         {blog.title}
                       </h2>
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {blog.content}
+                      <p className="text-gray-600 mb-4 line-clamp-3 flex-grow">
+                        {blog.summary || blog.content}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">
+                      <div className="flex items-center justify-between text-sm mt-auto pt-4 border-t border-gray-100">
+                        <span className="text-gray-600">
                           By {blog.author.name}
                         </span>
-                        <button
-                          onClick={() => router.push(`/blog/${blog.id}`)}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          Read More →
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -259,60 +266,35 @@ export default function BlogPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* Search */}
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Search Blogs
-              </h3>
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="search"
-                    placeholder="Search blogs..."
-                    className="w-full pl-3 pr-10 py-2 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute inset-y-0 right-0 px-3 flex items-center"
-                  >
-                    🔍
-                  </button>
-                </div>
-              </form>
-            </div>
-
+          <div className="lg:col-span-1 space-y-8">
+            {/* Search Bar - No longer needed here as it's in the main filter */}
+            
             {/* Popular Blogs */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Popular Blogs
               </h3>
               <div className="space-y-4">
                 {popularBlogs.map((blog) => (
                   <div
                     key={blog.id}
-                    className="flex items-start space-x-3 cursor-pointer"
+                    className="flex items-start space-x-4 cursor-pointer group"
                     onClick={() => router.push(`/blog/${blog.id}`)}
                   >
-                    {blog.media[0] && (
-                      <div className="relative h-16 w-16 flex-shrink-0">
+                    {blog.media[0]?.mediaUrl && (
+                      <div className="relative h-16 w-20 flex-shrink-0 rounded-md overflow-hidden">
                         <Image
                           src={blog.media[0].mediaUrl}
                           alt={blog.title}
                           layout="fill"
                           objectFit="cover"
-                          className="rounded"
                         />
                       </div>
                     )}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
+                      <h4 className="text-sm font-semibold text-gray-800 group-hover:text-[#FF6B00] transition-colors duration-300 line-clamp-2">
                         {blog.title}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {blog.viewCount || 0} views
-                      </p>
                     </div>
                   </div>
                 ))}

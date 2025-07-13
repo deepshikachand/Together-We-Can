@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/lib/email";
 
 // Initialize Prisma Client with logging
 const prisma = new PrismaClient({
@@ -58,6 +60,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new NextResponse(
+        JSON.stringify({
+          status: 'error',
+          message: 'Invalid email format'
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // 2. Check for existing user
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -83,7 +100,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Create new user
+    // 3. Create new user (initially unverified)
     const hashedPassword = await bcrypt.hash(password, 12);
     const newUser = await prisma.user.create({
       data: {
@@ -94,17 +111,41 @@ export async function POST(request: Request) {
         gender,
         city,
         phone,
-        role: "user"
+        role: "user",
+        emailVerified: null // User starts as unverified
       }
     });
 
-    // 4. Return success response (excluding password)
+    // 4. Create verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token: verificationToken,
+        expires,
+        userId: newUser.id
+      }
+    });
+
+    // 5. Send verification email
+    const emailResult = await sendVerificationEmail(email, verificationToken, name);
+    
+    if (!emailResult.success) {
+      console.error('Failed to send verification email:', emailResult.error);
+      // Optionally delete the user if email fails, or just log the error
+      // For now, we'll keep the user but log the error
+    }
+
+    // 6. Return success response (excluding password)
     const { password: _, ...userWithoutPassword } = newUser;
     return new NextResponse(
       JSON.stringify({
         status: 'success',
-        message: 'User registered successfully',
-        user: userWithoutPassword
+        message: 'User registered successfully. Please check your email to verify your account.',
+        user: userWithoutPassword,
+        emailSent: emailResult.success
       }),
       { 
         status: 201,

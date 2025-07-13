@@ -67,7 +67,7 @@ export default function ReviewBlogPage() {
     <>
       <Navbar />
       <div className="page-container min-h-screen bg-[#0E6E5C] flex flex-col items-center" style={{ paddingTop: '5rem' }}>
-        <div className="form-container bg-white p-8 rounded-2xl shadow-lg max-w-2xl w-full" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+        <div className="form-container bg-white p-10 rounded-2xl shadow-lg max-w-3xl w-full" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
           <h2 className="text-3xl font-bold mb-6 flex items-center gap-2" style={{ color: '#0E6E5C' }}>✍️ Review & Edit Blog</h2>
           <div className="mb-4">
             <label className="block font-semibold mb-1" style={{ color: '#0E6E5C' }}>Title</label>
@@ -82,7 +82,7 @@ export default function ReviewBlogPage() {
             <label className="block font-semibold mb-1" style={{ color: '#0E6E5C', marginTop: '1rem' }}>Content</label>
             <textarea
               className="textarea w-full p-3 rounded-lg border-none text-black text-base mb-2 focus:ring-2 focus:ring-[#0E6E5C] focus:outline-none"
-              style={{ background: '#f9f9f9', minHeight: '200px', resize: 'vertical' }}
+              style={{ background: '#f9f9f9', minHeight: '350px', resize: 'vertical' }}
               value={content}
               onChange={e => setContent(e.target.value)}
             />

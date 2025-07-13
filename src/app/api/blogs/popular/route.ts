@@ -5,44 +5,38 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // For demo purposes, we'll return the top 3 most viewed blogs
-    const popularBlogs = [
-      {
-        id: "1",
-        title: "Tree Plantation Drive in Delhi",
-        media: [
-          {
-            id: "1",
-            mediaUrl: "/images/tree-plantation.jpeg",
-          },
-        ],
-        viewCount: 150,
+    // Fetch top 3 most popular reviewed blogs from database
+    const popularBlogs = await prisma.blog.findMany({
+      where: {
+        reviewed: true, // Only fetch reviewed blogs
       },
-      {
-        id: "2",
-        title: "Clean Up Drive at Marine Drive, Mumbai",
-        media: [
-          {
-            id: "2",
-            mediaUrl: "/images/beach-cleanup.jpg",
-          },
-        ],
-        viewCount: 120,
+      include: {
+        event: {
+          select: {
+            media: {
+              select: {
+                mediaUrl: true
+              },
+              take: 1
+            }
+          }
+        },
       },
-      {
-        id: "3",
-        title: "Educational Workshop for Underprivileged Children",
-        media: [
-          {
-            id: "3",
-            mediaUrl: "/images/education-workshop.jpg",
-          },
-        ],
-        viewCount: 90,
+      orderBy: {
+        ratingAverage: 'desc', // Order by rating (popularity)
       },
-    ];
+      take: 3, // Limit to top 3
+    });
 
-    return NextResponse.json(popularBlogs);
+    // Transform the data to match expected format
+    const transformedBlogs = popularBlogs.map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      media: blog.event?.media.map(m => ({ mediaUrl: m.mediaUrl })) || [],
+      viewCount: blog.ratingAverage ? Math.round(blog.ratingAverage * 20) : 0,
+    }));
+
+    return NextResponse.json(transformedBlogs);
   } catch (error) {
     console.error("Error fetching popular blogs:", error);
     return NextResponse.json(
