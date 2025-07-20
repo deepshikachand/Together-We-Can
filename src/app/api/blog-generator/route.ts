@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { buildBlogPrompt } from '@/lib/buildBlogPrompt';
 
 const API_KEY = process.env.GOOGLE_API_KEY;

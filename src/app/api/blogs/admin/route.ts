@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -61,44 +61,9 @@ export async function GET(request: NextRequest) {
                { createdAt: "desc" },
     });
 
-    // Transform the data to match the expected format
-    const transformedBlogs = blogs.map(blog => ({
-      id: blog.id,
-      title: blog.title,
-      content: blog.content,
-      summary: blog.summary,
-      reviewed: blog.reviewed,
-      aiGenerated: blog.aiGenerated,
-      category: blog.event?.categories?.[0] ? {
-        id: blog.event.categories[0].id,
-        name: blog.event.categories[0].categoryName,
-      } : { id: "1", name: "General" },
-      city: blog.event?.city ? {
-        id: blog.event.city.id,
-        name: blog.event.city.cityName,
-        state: blog.event.city.state,
-      } : { id: "1", name: "Unknown", state: "Unknown" },
-      author: {
-        id: blog.author.id,
-        name: blog.author.name,
-      },
-      event: blog.event ? {
-        id: blog.event.id,
-        eventName: blog.event.eventName,
-        participants: blog.event.currentParticipants,
-      } : undefined,
-      media: [], // You can add media handling later if needed
-      createdAt: blog.createdAt.toISOString(),
-      updatedAt: blog.updatedAt.toISOString(),
-      viewCount: blog.ratingAverage ? Math.round(blog.ratingAverage * 20) : 0,
-    }));
-
-    return NextResponse.json(transformedBlogs);
+    return NextResponse.json(blogs);
   } catch (error) {
-    console.error("Error fetching admin blogs:", error);
-    return NextResponse.json(
-      { message: "Error fetching blogs" },
-      { status: 500 }
-    );
+    console.error('Admin blogs error:', error);
+    return NextResponse.json({ error: 'Failed to fetch blogs' }, { status: 500 });
   }
 } 
