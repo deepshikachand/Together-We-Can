@@ -205,7 +205,7 @@ export default function ProfilePage() {
             )}
           </div>
           <button
-            onClick={() => router.push('/auth/signout')}
+            onClick={() => router.push('/user-auth/signout')}
             className="mt-8 bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-8 rounded-full shadow-md transition duration-300"
           >
             Logout

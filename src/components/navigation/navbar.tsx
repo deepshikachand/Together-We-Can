@@ -19,7 +19,7 @@ export const Navbar = () => {
       router.push("/drives");
     } else {
       // If user is not logged in, redirect to signup page
-      router.push("/auth/signup");
+      router.push("/user-auth/signup");
     }
   };
 
@@ -51,7 +51,7 @@ export const Navbar = () => {
               Contact Us
             </Link>
             <button 
-              onClick={() => session ? router.push("/profile") : router.push("/auth/signin")}
+              onClick={() => session ? router.push("/profile") : router.push("/user-auth/signin")}
               className="bg-[#F2994A] hover:bg-[#f2994a]/80 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300"
             >
               {session ? "Profile" : "Sign Up / Sign In"}
@@ -127,7 +127,7 @@ export const Navbar = () => {
             </Link>
             <div className="px-3 py-2">
               <button 
-                onClick={() => session ? router.push("/profile") : router.push("/auth/signin")}
+                onClick={() => session ? router.push("/profile") : router.push("/user-auth/signin")}
                 className="w-full bg-[#F2994A] hover:bg-[#f2994a]/80 text-white font-bold px-4 py-2 rounded-full shadow-md transition duration-300"
               >
                 {session ? "Profile" : "Sign Up / Sign In"}

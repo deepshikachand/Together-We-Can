@@ -158,7 +158,7 @@ export default function SignUp() {
 
       if (data.status === 'success') {
         // Registration successful
-        router.push("/auth/signin?registered=true");
+        router.push("/user-auth/signin?registered=true");
       } else {
         throw new Error(data.message || 'Registration failed');
       }

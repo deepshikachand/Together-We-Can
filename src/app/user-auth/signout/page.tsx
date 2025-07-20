@@ -21,7 +21,7 @@ export default function SignOutPage() {
             <Link href="/">
               <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-full transition duration-300">Home</button>
             </Link>
-            <Link href="/auth/signin">
+            <Link href="/user-auth/signin">
               <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-full transition duration-300">Sign In</button>
             </Link>
           </div>

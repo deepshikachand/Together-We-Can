@@ -52,7 +52,7 @@ export const sendEmail = async (options: EmailOptions) => {
 };
 
 export const sendVerificationEmail = async (email: string, token: string, name: string) => {
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}`;
+  const verificationUrl = `${process.env.NEXTAUTH_URL}/user-auth/verify?token=${token}`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
