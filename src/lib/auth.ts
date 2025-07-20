@@ -4,10 +4,16 @@ import bcrypt from "bcryptjs";
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
+function getPrisma() {
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(getPrisma()),
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -16,6 +22,7 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        const prisma = getPrisma();
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
