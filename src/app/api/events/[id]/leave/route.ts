@@ -5,13 +5,17 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    const eventId = params.id;
+    // Extract eventId from the URL path: /api/events/[id]/leave
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split("/");
+    // pathParts: ["", "api", "events", "<id>", "leave"]
+    const eventId = pathParts[3];
     const userId = session.user.id;
     const { reason } = await request.json();
     console.log(`User ${userId} is de-enrolling from event ${eventId}. Reason: ${reason}`);

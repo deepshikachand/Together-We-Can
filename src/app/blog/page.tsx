@@ -115,7 +115,7 @@ export default function BlogPage() {
 
     // Debounce search query
     const handler = setTimeout(() => {
-      fetchBlogs();
+    fetchBlogs();
     }, 500); // 500ms delay
 
     return () => {
@@ -178,30 +178,30 @@ export default function BlogPage() {
                   className="block w-full px-4 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
                 />
 
-                {/* City Filter */}
-                <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
+              {/* City Filter */}
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
-                >
-                  <option value="">All Cities</option>
-                  {cities.map((city) => (
-                    <option key={city.id} value={city.id}>
-                      {`${city.cityName}, ${city.state}`}
-                    </option>
-                  ))}
-                </select>
+              >
+                <option value="">All Cities</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {`${city.cityName}, ${city.state}`}
+                  </option>
+                ))}
+              </select>
 
-                {/* Sort By */}
+              {/* Sort By */}
                 <div title="Sort by popularity">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
                     className="block w-full pl-3 pr-10 py-2 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent sm:text-sm"
-                  >
+              >
                     <option value="most-viewed">Most Viewed</option>
                     <option value="least-viewed">Least Viewed</option>
-                  </select>
+              </select>
                 </div>
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function BlogPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-8">
             {/* Search Bar - No longer needed here as it's in the main filter */}
-            
+
             {/* Popular Blogs */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">

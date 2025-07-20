@@ -5,10 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -16,7 +13,11 @@ export async function POST(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const eventId = context.params.id;
+    // Extract eventId from the URL path: /api/events/[id]/join
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split("/");
+    // pathParts: ["", "api", "events", "<id>", "join"]
+    const eventId = pathParts[3];
     const userId = session.user.id;
 
     // Check if event exists

@@ -5,13 +5,17 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ message: "You must be signed in to join a drive." }, { status: 401 });
     }
-    const eventId = params.id;
+    // Extract eventId from the URL path: /api/events/[id]/register
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split("/");
+    // pathParts: ["", "api", "events", "<id>", "register"]
+    const eventId = pathParts[3];
     // Get user from DB
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) {

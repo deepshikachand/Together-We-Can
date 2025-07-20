@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +19,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
-    const { id } = params; // Get event ID from URL parameters
+    // Extract eventId from the URL path: /api/events/[id]/status
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split("/");
+    // pathParts: ["", "api", "events", "<id>", "status"]
+    const id = pathParts[3];
     const { status, statusReason, postponedUntil } = await request.json();
 
     const validStatuses = ["upcoming", "active", "completed", "cancelled", "postponed"];

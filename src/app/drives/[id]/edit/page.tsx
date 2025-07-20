@@ -32,6 +32,16 @@ export default function EditDrivePage() {
   const router = useRouter();
   const params = useParams();
   const eventId = params.id as string;
+
+  if (!eventId) {
+    return (
+      <>
+        <Navbar />
+        <div className="p-8 text-center text-red-600">Invalid drive ID</div>
+      </>
+    );
+  }
+
   const { data: session, status } = useSession();
 
   const [event, setEvent] = useState<Event | null>(null);
@@ -49,10 +59,34 @@ export default function EditDrivePage() {
   const [isCreator, setIsCreator] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState("");
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setCategoriesLoading(true);
+      setCategoriesError("");
+      try {
+        const res = await fetch("/api/categories");
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        setCategories(data.map((cat: { categoryName: string }) => cat.categoryName));
+      } catch (err: any) {
+        setCategoriesError(err.message || "Error loading categories");
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
+    let isMounted = true;
     if (status === "loading") return;
     if (!session) {
+      console.log("No session, redirecting to /auth/signin");
       router.push("/auth/signin");
       return;
     }
@@ -63,13 +97,14 @@ export default function EditDrivePage() {
         const res = await fetch(`/api/events/${eventId}`);
         if (!res.ok) {
           if (res.status === 404) {
-            setError("Drive not found.");
+            if (isMounted) setError("Drive not found.");
           } else {
             throw new Error("Failed to fetch drive details");
           }
           return;
         }
         const data: Event = await res.json();
+        if (!isMounted) return;
         setEvent(data);
         setTitle(data.eventName);
         setDescription(data.description);
@@ -82,7 +117,6 @@ export default function EditDrivePage() {
         setPostponedUntil(data.postponedUntil ? new Date(data.postponedUntil) : null);
 
         console.log("Fetched Event Categories:", data.categories);
-
         console.log("Logged in user ID:", session?.user?.id);
         console.log("Event Creator ID:", data.creatorId);
         console.log("Is Creator (comparison):", session?.user?.id === data.creatorId);
@@ -90,18 +124,23 @@ export default function EditDrivePage() {
         if (session?.user?.id === data.creatorId) {
           setIsCreator(true);
         } else {
-          setError("You are not authorized to edit this drive.");
-          // Optionally redirect non-creators
+          if (isMounted) setError("You are not authorized to edit this drive.");
+          console.log("Not creator, redirecting to /drives/" + eventId);
           router.push(`/drives/${eventId}`);
+          return;
         }
       } catch (err: any) {
-        setError(err.message || "Error loading drive details");
+        if (isMounted) setError(err.message || "Error loading drive details");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchEvent();
+
+    return () => {
+      isMounted = false;
+    };
   }, [eventId, session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,23 +149,32 @@ export default function EditDrivePage() {
     setError("");
     setSubmitSuccess(false);
 
+    // Step 1: Validate payload before sending
+    const payload = {
+      eventName: title || event?.eventName || "",
+      description: description || event?.description || "",
+      category: category || event?.categories[0]?.categoryName || "",
+      startDate: (startDate ? startDate.toISOString() : (event?.startDate ? new Date(event.startDate).toISOString() : "")),
+      endDate: (endDate ? endDate.toISOString() : (event?.endDate ? new Date(event.endDate).toISOString() : undefined)),
+      fullAddress: location || event?.fullAddress || "",
+      status: currentStatus || event?.status || "",
+      statusReason: (currentStatus === "cancelled" || currentStatus === "postponed") ? (statusReason || event?.statusReason || "") : null,
+      postponedUntil: currentStatus === "postponed" ? (postponedUntil ? postponedUntil.toISOString() : (event?.postponedUntil ? new Date(event.postponedUntil).toISOString() : null)) : null,
+    };
+    if (!payload.eventName || !payload.description || !payload.startDate || !payload.fullAddress || !payload.status || !payload.category) {
+      setError("Please fill all required fields, including category.");
+      setIsSubmitting(false);
+      return;
+    }
+    console.log("Submitting event update payload:", payload);
+
     try {
       const res = await fetch(`/api/events/${eventId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          eventName: title,
-          description,
-          category,
-          startDate: startDate?.toISOString(),
-          endDate: endDate?.toISOString(),
-          fullAddress: location,
-          status: currentStatus,
-          statusReason: currentStatus === "cancelled" || currentStatus === "postponed" ? statusReason : null,
-          postponedUntil: currentStatus === "postponed" ? postponedUntil?.toISOString() : null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -224,19 +272,16 @@ export default function EditDrivePage() {
               <label htmlFor="category" className="block text-sm font-medium" style={{ fontWeight: '500', color: '#263238', fontSize: '0.95rem' }}>Category</label>
               <select
                 id="category"
-                className="mt-1 block w-full text-black" style={{ border: '1px solid #cfd8dc', padding: '0.75rem', borderRadius: '0.5rem', transition: 'border-color 0.3s ease' }}
+                className="mt-1 block w-full text-black"
+                style={{ border: '1px solid #cfd8dc', padding: '0.75rem', borderRadius: '0.5rem', transition: 'border-color 0.3s ease' }}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
               >
-                <option value="">Select Category</option>
-                <option value="Environment">Environment</option>
-                <option value="Animal Welfare">Animal Welfare</option>
-                <option value="Education">Education</option>
-                <option value="Health">Health</option>
-                <option value="Community">Community</option>
-                <option value="Disaster Relief">Disaster Relief</option>
-                <option value="Other">Other</option>
+                <option value="" disabled>Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
             </div>
 

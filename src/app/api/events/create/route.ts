@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
     const {
       eventName,
       description,
-      date,
+      date, // keep for backward compatibility, but prefer startDate
+      startDate,
       time,
       location,
       cityId,
@@ -25,8 +26,11 @@ export async function POST(request: NextRequest) {
       expectedParticipants,
     } = body;
 
+    // Use startDate if provided, otherwise fallback to date
+    const eventStartDate = startDate ? new Date(startDate) : new Date(date);
+
     // Validate required fields
-    if (!eventName || !description || !date || !time || !location || !cityId || !categoryIds || !expectedParticipants) {
+    if (!eventName || !description || !eventStartDate || !time || !location || !cityId || !categoryIds || !expectedParticipants) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400 }
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
       data: {
         eventName,
         description,
-        date: new Date(date),
+        startDate: eventStartDate,
         time,
         location,
         cityId,

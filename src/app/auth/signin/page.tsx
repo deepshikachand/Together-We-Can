@@ -40,7 +40,7 @@ export default function SignIn() {
           setShowResendVerification(true);
           setResendEmail(email);
         } else {
-          setError("Invalid email or password");
+        setError("Invalid email or password");
         }
       } else {
         router.push("/");

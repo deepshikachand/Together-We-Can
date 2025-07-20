@@ -160,7 +160,7 @@ export default function BlogPage() {
       </main>
     );
   }
-  
+
   return (
     <main className="min-h-screen bg-gray-50">
       <Navbar />
@@ -182,23 +182,23 @@ export default function BlogPage() {
 
         {/* Featured Image */}
         <div className="relative h-96 mb-12 rounded-lg overflow-hidden shadow-lg">
-          <Image
+            <Image
             src={blog.media[0]?.mediaUrl || '/images/hero-1.jpg'}
-            alt={blog.title}
-            layout="fill"
-            objectFit="cover"
+              alt={blog.title}
+              layout="fill"
+              objectFit="cover"
             priority
-          />
-        </div>
+            />
+          </div>
 
         {/* Content */}
         <div className="prose prose-lg max-w-none mb-12 text-gray-700">
             <p className="lead font-semibold text-gray-800">{blog.summary}</p>
-            {blog.content.split("\n\n").map((paragraph, index) => (
+          {blog.content.split("\n\n").map((paragraph, index) => (
               <p key={index}>
-                {paragraph}
-              </p>
-            ))}
+              {paragraph}
+            </p>
+          ))}
         </div>
 
         {/* Event Details */}

@@ -75,7 +75,7 @@ export default function ContactPage() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
+      {/* Header Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-[#003B2F] tracking-tight">
             Get in Touch
@@ -175,7 +175,7 @@ export default function ContactPage() {
                   <p className="text-gray-600">123 Community Lane, Dehradun, India</p>
                 </div>
               </div>
-              
+
               {/* Social Icons */}
               <div className="pt-6 border-t border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Follow Us</h3>
@@ -197,7 +197,7 @@ export default function ContactPage() {
       </div>
     </main>
   );
-}
+} 
 
 // Add some styles to globals.css if they aren't already there
 /* In globals.css:

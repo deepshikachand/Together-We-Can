@@ -105,6 +105,7 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
   };
 
   const handleGenerateBlog = async () => {
+    if (!event) return; // Prevent usage if event is null
     setBlogLoading(true);
     setBlogMessage(null);
     try {
@@ -314,13 +315,13 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
                 {isCreator && event.status === "completed" && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-md flex flex-col items-center">
                     {!blogExists ? (
-                      <button
+                        <button
                         className="px-6 py-2 bg-[#0E6E5C] text-white rounded-md hover:bg-[#0a5748] text-lg font-semibold"
                         onClick={handleGenerateBlog}
                         disabled={blogLoading}
-                      >
+                        >
                         {blogLoading ? 'Generating Blog...' : 'Generate Blog'}
-                      </button>
+                        </button>
                     ) : (
                       <Link href={`/blogs/review/${event.id}`}>
                         <button className="px-6 py-2 bg-[#0E6E5C] text-white rounded-md hover:bg-[#0a5748] text-lg font-semibold">
@@ -331,6 +332,12 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
                     {blogMessage && (
                       <p className={`mt-2 text-sm font-medium ${blogMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{blogMessage}</p>
                     )}
+                  </div>
+                )}
+                {/* Show Cancelled label if event is cancelled */}
+                {event.status === "cancelled" && (
+                  <div className="mt-4 p-4 bg-red-100 rounded-md flex flex-col items-center">
+                    <span className="text-red-800 font-semibold text-lg">This event was cancelled.</span>
                   </div>
                 )}
 
@@ -349,14 +356,21 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
                       {joinLoading ? "Processing..." : alreadyJoined ? "Already Registered" : "Register for Drive"}
                       </button>
                     )}
-                  {isCreator && event.status !== "completed" && (
-                    <Link
-                      href={`/drives/${event.id}/edit`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#0E6E5C] hover:bg-[#0a5748] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0E6E5C]"
-                    >
-                      Edit Drive
-                    </Link>
-                  )}
+                  {isCreator && event.status !== "completed" && (() => {
+                    const now = new Date();
+                    const eventEndDate = event.endDate ? new Date(event.endDate) : new Date(event.startDate);
+                    if (now < eventEndDate) {
+                      return (
+                        <Link
+                          href={`/drives/${event.id}/edit`}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#0E6E5C] hover:bg-[#0a5748] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0E6E5C]"
+                        >
+                          Edit Drive
+                        </Link>
+                      );
+                    }
+                    return null;
+                  })()}
                   </div>
 
               </div>

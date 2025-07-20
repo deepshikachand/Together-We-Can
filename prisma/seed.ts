@@ -179,8 +179,18 @@ async function main() {
           "Distributed 200 meals"
         ],
         testimonials: [
-          "It was a great experience!",
-          "Loved being part of this drive!"
+          {
+            userId: demoUser.id,
+            testimonial: "It was a great experience!",
+            rating: 5,
+            submittedAt: new Date()
+          },
+          {
+            userId: demoUser.id,
+            testimonial: "Loved being part of this drive!",
+            rating: 5,
+            submittedAt: new Date()
+          }
         ],
         keywords: ["environment", "community", "trees"],
         userId: demoUser.id,

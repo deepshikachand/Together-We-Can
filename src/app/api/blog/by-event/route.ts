@@ -12,6 +12,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ blog });
   } catch (error) {
     console.error('Blog by-event error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error', stack: error.stack }, { status: 500 });
+    let message = 'Internal server error';
+    let stack = undefined;
+    if (error instanceof Error) {
+      message = error.message;
+      stack = error.stack;
+    }
+    return NextResponse.json({ error: message, stack }, { status: 500 });
   }
 } 

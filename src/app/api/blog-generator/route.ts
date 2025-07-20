@@ -45,7 +45,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Build the prompt
-    const prompt = buildBlogPrompt(event, driveCompletion);
+    const prompt = buildBlogPrompt({
+      ...event,
+      fullAddress: event.fullAddress ?? undefined,
+      startDate: event.startDate ? event.startDate.toISOString() : undefined,
+      endDate: event.endDate ? event.endDate.toISOString() : undefined,
+    }, driveCompletion);
 
     // Call Gemini API via REST
     if (!API_KEY) {

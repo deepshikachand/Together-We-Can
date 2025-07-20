@@ -108,81 +108,81 @@ export default function Home() {
             )) : (
               // fallback to old dummy cards if no blogs
               <>
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-48">
-                    <Image
-                      src="/images/tree-plantation.jpeg"
-                      alt="Tree Plantation Drive"
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-[#0E6E5C]">Environment</span>
-                      <span className="text-sm text-gray-500">200 participants</span>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">Tree Plantation Drive in Delhi</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      In the heart of Delhi, volunteers gathered to plant over 500 trees in local parks, contributing to environmental sustainability.
-                    </p>
-                    <button 
-                      className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
-                    >
-                      Learn More
-                    </button>
-                  </div>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-48">
+                <Image
+                  src="/images/tree-plantation.jpeg"
+                  alt="Tree Plantation Drive"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-[#0E6E5C]">Environment</span>
+                  <span className="text-sm text-gray-500">200 participants</span>
                 </div>
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-48">
-                    <Image
-                      src="/images/beach-cleanup.jpg"
-                      alt="Beach Cleanup Drive"
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-[#0E6E5C]">Environment</span>
-                      <span className="text-sm text-gray-500">200 participants</span>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">Clean Up Drive at Marine Drive</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      Over 200 participants joined hands to clean the iconic Marine Drive, making the beach cleaner and more eco-friendly.
-                    </p>
-                    <button 
-                      className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
-                    >
-                      Learn More
-                    </button>
-                  </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900">Tree Plantation Drive in Delhi</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  In the heart of Delhi, volunteers gathered to plant over 500 trees in local parks, contributing to environmental sustainability.
+                </p>
+                <button 
+                  className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-48">
+                <Image
+                  src="/images/beach-cleanup.jpg"
+                  alt="Beach Cleanup Drive"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-[#0E6E5C]">Environment</span>
+                  <span className="text-sm text-gray-500">200 participants</span>
                 </div>
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-48">
-                    <Image
-                      src="/images/education-workshop.jpg"
-                      alt="Educational Workshop"
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-[#0E6E5C]">Education</span>
-                      <span className="text-sm text-gray-500">150 participants</span>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">Educational Workshop for Children</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      Volunteers conducted workshops for over 100 underprivileged children, helping them with basic education and career guidance.
-                    </p>
-                    <button 
-                      className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
-                    >
-                      Learn More
-                    </button>
-                  </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900">Clean Up Drive at Marine Drive</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  Over 200 participants joined hands to clean the iconic Marine Drive, making the beach cleaner and more eco-friendly.
+                </p>
+                <button 
+                  className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-48">
+                <Image
+                  src="/images/education-workshop.jpg"
+                  alt="Educational Workshop"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-[#0E6E5C]">Education</span>
+                  <span className="text-sm text-gray-500">150 participants</span>
                 </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900">Educational Workshop for Children</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  Volunteers conducted workshops for over 100 underprivileged children, helping them with basic education and career guidance.
+                </p>
+                <button 
+                  className="w-full bg-[#0E6E5C] text-white px-4 py-2 rounded-lg hover:bg-[#0a5748] transition-colors"
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
               </>
             )}
           </div>
@@ -210,7 +210,7 @@ export default function Home() {
               <p className="text-center text-sm mt-2">
                 Sign up for the drive that matches your interests
               </p>
-            </div>
+                </div>
             {/* Participate Card */}
             <div className="bg-[#1b7b6f] text-white rounded-2xl shadow-lg p-6 w-full transition-none cursor-default hover:shadow-none hover:scale-100">
               <img src="/images/participate-icon.jpg" alt="Participate" className="mx-auto mb-4 w-16 h-16" />
@@ -218,7 +218,7 @@ export default function Home() {
               <p className="text-center text-sm mt-2">
                 Join the community and create positive change together
               </p>
-            </div>
+              </div>
           </div>
         </div>
       </section>

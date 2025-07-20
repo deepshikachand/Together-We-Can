@@ -1,7 +1,23 @@
-export function buildBlogPrompt(event, driveCompletion) {
+// Define minimal types for event and driveCompletion if not imported
+interface BlogPromptEvent {
+  eventName: string;
+  category?: string;
+  location?: string;
+  fullAddress?: string;
+  startDate?: string;
+  endDate?: string;
+}
+interface BlogPromptDriveCompletion {
+  summary?: string;
+  highlights?: string[];
+  testimonials?: { testimonial: string; rating: number }[];
+  keywords?: string[];
+}
+
+export function buildBlogPrompt(event: BlogPromptEvent, driveCompletion: BlogPromptDriveCompletion) {
   const testimonialsText = driveCompletion.testimonials?.length
     ? driveCompletion.testimonials
-        .map(t => `- “${t.comment}” (Rating: ${t.rating}/5)`)
+        .map(t => `- “${t.testimonial}” (Rating: ${t.rating}/5)`)
         .join('\n')
     : 'No testimonials were submitted.';
 

@@ -15,30 +15,6 @@ export async function GET(request: NextRequest) {
     const top = searchParams.get("top");
     const now = new Date();
 
-    // If 'top' param is present, return top N drives by participants
-    if (top) {
-      const limit = parseInt(top);
-      if (!isNaN(limit)) {
-      const topEvents = await prisma.event.findMany({
-          take: limit,
-          orderBy: {
-            currentParticipants: 'desc'
-          },
-        include: {
-          city: true,
-          categories: true,
-            creator: {
-              select: {
-                id: true,
-                name: true,
-              },
-        },
-          }
-      });
-      return NextResponse.json(topEvents);
-      }
-    }
-
     // Build where clause for filtering
     let where: Prisma.EventWhereInput = {};
 
@@ -81,6 +57,41 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Only show upcoming events (endDate or startDate in the future)
+    where = {
+      ...where,
+      OR: [
+        { endDate: { gte: now } },
+        { AND: [{ endDate: null }, { startDate: { gte: now } }] }
+      ],
+      status: { not: "completed" }
+    };
+
+    // If 'top' param is present, return top N drives by participants
+    if (top) {
+      const limit = parseInt(top);
+      if (!isNaN(limit)) {
+        const topEvents = await prisma.event.findMany({
+          take: limit,
+          orderBy: {
+            currentParticipants: 'desc'
+          },
+          where,
+          include: {
+            city: true,
+            categories: true,
+            creator: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          }
+        });
+        return NextResponse.json(topEvents);
+      }
+    }
+
     // Fetch events with filters
     let events = await prisma.event.findMany({
       where,
@@ -115,13 +126,29 @@ export async function GET(request: NextRequest) {
       let newStatusReason = event.statusReason;
       let newPostponedUntil = event.postponedUntil;
 
-      const effectiveEndDate = event.endDate || event.startDate; // Use endDate if available, otherwise startDate
+      const minParticipants = Math.max(
+        Math.ceil(event.expectedParticipants / 3),
+        10
+      );
+      const effectiveEndDate = event.endDate || event.startDate;
 
-      // Logic to set event to 'completed' if its effective end date has passed
+      // Set to not_completed if event is over and did not meet minimum participants
+      if (
+        new Date(effectiveEndDate) < now &&
+        event.currentParticipants < minParticipants &&
+        event.status !== "not_completed" &&
+        event.status !== "cancelled"
+      ) {
+        newStatus = "not_completed";
+        newStatusReason = "Event did not meet the minimum participant requirement and was not completed.";
+        needsUpdate = true;
+      }
+      // Always set to completed if the end date has passed, regardless of previous status (unless cancelled)
       if (new Date(effectiveEndDate) < now && event.status !== "completed" && event.status !== "cancelled") {
         newStatus = "completed";
         newStatusReason = "Automatically completed as end date passed.";
         needsUpdate = true;
+        console.log(`Auto-completing event ${event.id} (${event.eventName}) as its end date (${effectiveEndDate}) is before now (${now.toISOString()})`);
       } else if (event.status === "postponed" && event.postponedUntil && new Date(event.postponedUntil) < now) {
         // Logic to revert from postponed to upcoming (already present)
         newStatus = "upcoming";
@@ -138,11 +165,12 @@ export async function GET(request: NextRequest) {
         newStatus = "completed";
         newStatusReason = "Automatically completed as end date passed while active.";
         needsUpdate = true;
+        console.log(`Auto-completing active event ${event.id} (${event.eventName}) as its end date (${effectiveEndDate}) is before now (${now.toISOString()})`);
       }
 
       if (needsUpdate) {
-        // Perform the update in the database
-        const updatedEvent = await prisma.event.update({
+        // Always include all required fields
+        return await prisma.event.update({
           where: { id: event.id },
           data: {
             status: newStatus,
@@ -150,14 +178,28 @@ export async function GET(request: NextRequest) {
             statusUpdatedAt: now,
             postponedUntil: newPostponedUntil,
           },
+          include: {
+            city: true,
+            categories: true,
+            creator: { select: { id: true, name: true } },
+          },
         });
-        return updatedEvent; // Return the updated event data
+      } else {
+        // Always fetch the full event with all required fields
+        return await prisma.event.findUnique({
+          where: { id: event.id },
+          include: {
+            city: true,
+            categories: true,
+            creator: { select: { id: true, name: true } },
+          },
+        });
       }
-      return event; // Return the original event if no update was needed
     });
 
     // Wait for all potential updates to complete
-    events = await Promise.all(updates);
+    const updatedResults = await Promise.all(updates);
+    events = updatedResults.filter((event): event is NonNullable<typeof event> => event !== null);
 
     // Filter out any events that somehow still have null city (just in case)
     events = events.filter(event => event.city !== null);
