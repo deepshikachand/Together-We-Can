@@ -47,7 +47,7 @@ export default function DriveRegistration() {
   useEffect(() => {
     // Redirect if not authenticated
     if (status === "unauthenticated") {
-      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${id}/register`));
+      router.push('/user-auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${id}/register`));
     }
 
     // Fetch drive details

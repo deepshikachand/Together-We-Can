@@ -30,7 +30,7 @@ export default function CreateEventForm() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/auth/signin?callbackUrl=/create/event");
+      router.push("/user-auth/signin?callbackUrl=/create/event");
     }
   }, [status, router]);
 

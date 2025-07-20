@@ -86,8 +86,8 @@ export default function EditDrivePage() {
     let isMounted = true;
     if (status === "loading") return;
     if (!session) {
-      console.log("No session, redirecting to /auth/signin");
-      router.push("/auth/signin");
+      console.log("No session, redirecting to /user-auth/signin");
+      router.push("/user-auth/signin");
       return;
     }
 
