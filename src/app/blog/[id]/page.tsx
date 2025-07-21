@@ -69,6 +69,11 @@ interface Blog {
     date: string;
     time: string;
     location: string;
+    categories: {
+      categoryName: string;
+    }[];
+    startDate: string;
+    currentParticipants: number;
   };
   media: {
     mediaUrl: string;
@@ -171,7 +176,9 @@ export default function BlogPage() {
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
-              {blog.category ? blog.category.name : "Unknown Category"}
+              {blog.event && blog.event.categories && blog.event.categories.length > 0
+                ? blog.event.categories.map(cat => cat.categoryName).join(", ")
+                : "Unknown Category"}
             </span>
             <span className="text-sm text-gray-500">
               {new Date(blog.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -213,9 +220,9 @@ export default function BlogPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
               <p><strong>Drive:</strong> {blog.event.eventName || "Unknown Event"}</p>
-              <p><strong>Date:</strong> {blog.event.date ? new Date(blog.event.date).toLocaleDateString() : "Unknown Date"}</p>
+              <p><strong>Date:</strong> {blog.event.startDate ? new Date(blog.event.startDate).toLocaleDateString() : "Unknown Date"}</p>
               <p><strong>Location:</strong> {blog.event.location || "Unknown Location"}</p>
-              <p><strong>Participants:</strong> {blog.event.participants ?? "N/A"}</p>
+              <p><strong>Participants:</strong> {blog.event.currentParticipants ?? "N/A"}</p>
             </div>
              <button
                 onClick={() => router.push(`/drives/${blog.event?.id}`)}

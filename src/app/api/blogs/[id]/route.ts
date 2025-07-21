@@ -21,16 +21,18 @@ export async function GET(
           },
         },
         event: {
-          include: {
+          select: {
+            eventName: true,
+            startDate: true,
+            location: true,
+            currentParticipants: true,
             categories: {
               select: {
-                id: true,
                 categoryName: true,
               },
             },
             city: {
               select: {
-                id: true,
                 cityName: true,
                 state: true,
               },
