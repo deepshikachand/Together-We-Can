@@ -98,7 +98,7 @@ export default function DriveDetailsPage({ params }: { params: Promise<{ id: str
 
   const handleJoinClick = async () => {
     if (!session) {
-      router.push(`/auth/signin?callbackUrl=/drives/${id}/register`);
+      router.push(`/user-auth/signin?callbackUrl=/drives/${id}/register`);
       return;
     }
     router.push(`/drives/${id}/register`);

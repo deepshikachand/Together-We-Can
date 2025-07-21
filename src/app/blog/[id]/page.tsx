@@ -122,7 +122,8 @@ export default function BlogPage() {
             throw new Error("Failed to fetch blog data.");
           }
           const data = await response.json();
-          setBlog(data);
+          console.log('Fetched blog data:', data);
+          setBlog(data.blog);
         } catch (err: any) {
           setError(err.message);
         } finally {
@@ -169,21 +170,23 @@ export default function BlogPage() {
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">{blog.category.name}</span>
+            <span className="text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
+              {blog.category ? blog.category.name : "Unknown Category"}
+            </span>
             <span className="text-sm text-gray-500">
               {new Date(blog.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           </div>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">{blog.title}</h1>
           <div className="flex items-center text-gray-600">
-            <span>By {blog.author.name}</span>
+            <span>By {blog.author ? blog.author.name : "Unknown Author"}</span>
           </div>
         </header>
 
         {/* Featured Image */}
         <div className="relative h-96 mb-12 rounded-lg overflow-hidden shadow-lg">
             <Image
-            src={blog.media[0]?.mediaUrl || '/images/hero-1.jpg'}
+            src={blog.media && blog.media[0]?.mediaUrl ? blog.media[0].mediaUrl : '/images/hero-1.jpg'}
               alt={blog.title}
               layout="fill"
               objectFit="cover"
@@ -194,11 +197,12 @@ export default function BlogPage() {
         {/* Content */}
         <div className="prose prose-lg max-w-none mb-12 text-gray-700">
             <p className="lead font-semibold text-gray-800">{blog.summary}</p>
-          {blog.content.split("\n\n").map((paragraph, index) => (
-              <p key={index}>
-              {paragraph}
-            </p>
-          ))}
+          {blog.content
+            ? blog.content.split("\n\n").map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))
+            : <p>No content available.</p>
+          }
         </div>
 
         {/* Event Details */}
@@ -208,10 +212,10 @@ export default function BlogPage() {
               Related Drive Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-              <p><strong>Drive:</strong> {blog.event.eventName}</p>
-              <p><strong>Date:</strong> {new Date(blog.event.date).toLocaleDateString()}</p>
-              <p><strong>Location:</strong> {blog.event.location}</p>
-              <p><strong>Participants:</strong> {blog.event.participants}</p>
+              <p><strong>Drive:</strong> {blog.event.eventName || "Unknown Event"}</p>
+              <p><strong>Date:</strong> {blog.event.date ? new Date(blog.event.date).toLocaleDateString() : "Unknown Date"}</p>
+              <p><strong>Location:</strong> {blog.event.location || "Unknown Location"}</p>
+              <p><strong>Participants:</strong> {blog.event.participants ?? "N/A"}</p>
             </div>
              <button
                 onClick={() => router.push(`/drives/${blog.event?.id}`)}

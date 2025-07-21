@@ -132,7 +132,7 @@ export default function DrivesPage() {
 
   const handleJoinDrive = (driveId: string) => {
     if (!session) {
-      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${driveId}/register`));
+      router.push('/user-auth/signin?callbackUrl=' + encodeURIComponent(`/drives/${driveId}/register`));
     } else {
       router.push(`/drives/${driveId}/register`);
     }
