@@ -104,7 +104,17 @@ A modern web platform that connects users to social drives and volunteer opportu
 - AI blog generation via Google Generative Language API
 
 ---
+## Deployment Status
 
+Due to a series of technical challenges with Prisma, authentication setup, and build errors, the live deployment is currently on hold. However, the project is fully functional locally.
+
+To run the project locally:
+1. Clone the repo
+2. Run `npm install`
+3. Set up your `.env` file (see `.env.example`)
+4. Run `npm run dev`
+   
+---
 ## Contributing
 
 1. Fork the repository
