@@ -78,12 +78,12 @@ export default function DrivesPage() {
           setCities(citiesData);
           setCategories(categoriesData);
           
-          // Set Mumbai as default city
-          const mumbai = citiesData.find((city: City) => city.cityName === "Mumbai");
-          if (mumbai) {
-            setCurrentCity(mumbai);
-            setSelectedCity(mumbai.id);
-          }
+          // Remove Mumbai as default city
+          // const mumbai = citiesData.find((city: City) => city.cityName === "Mumbai");
+          // if (mumbai) {
+          //   setCurrentCity(mumbai);
+          //   setSelectedCity(mumbai.id);
+          // }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
